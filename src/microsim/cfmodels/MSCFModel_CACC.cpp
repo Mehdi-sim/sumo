@@ -47,6 +47,7 @@
 #define DEBUG_CACC_INSERTION_FOLLOW_SPEED 0
 #define DEBUG_CACC_SECURE_GAP 0
 #define DEBUG_COND (veh->isSelected())
+#define DEBUG_DRIVER_ERRORS
 //#define DEBUG_COND (veh->getID() == "flow.0")
 //#define DEBUG_COND (veh->getID() == "CVflowToC2.11")
 
@@ -111,7 +112,8 @@ MSCFModel_CACC::freeSpeed(const MSVehicle* const veh, double speed, double seen,
 
 double
 MSCFModel_CACC::followSpeed(const MSVehicle* const veh, double speed, double gap2pred, double predSpeed, double predMaxDecel, const MSVehicle* const pred) const {
-
+    
+    applyHeadwayAndSpeedDifferencePerceptionErrors(veh, speed, gap2pred, predSpeed, predMaxDecel, pred);
     const double desSpeed = veh->getLane()->getVehicleMaxSpeed(veh);
     const double vCACC = _v(veh, pred, gap2pred, speed, predSpeed, desSpeed, true);
     const double vSafe = maximumSafeFollowSpeed(gap2pred, speed, predSpeed, predMaxDecel);
@@ -143,6 +145,7 @@ MSCFModel_CACC::stopSpeed(const MSVehicle* const veh, const double speed, double
     // NOTE: This allows return of smaller values than minNextSpeed().
     // Only relevant for the ballistic update: We give the argument headway=TS, to assure that
     // the stopping position is approached with a uniform deceleration also for tau!=TS.
+    applyHeadwayPerceptionError(veh, speed, gap);
     return MIN2(maximumSafeStopSpeed(gap, decel, speed, false, veh->getActionStepLengthSecs()), maxNextSpeed(speed, veh));
 }
 
